@@ -1192,7 +1192,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossEventManager
   triggerScore: 5
   bossEventDuration: 15
-  bossPrefab: {fileID: 8104659962212731574, guid: a7c3e6f3ce6e01946ba410818731daa7, type: 3}
+  bossPrefab: {fileID: 0}
   bossObstacleSpawnInterval: 1
   bossObstacleSpawnDelay: 1
   wideWallLeftPrefab: {fileID: 601916821657093097, guid: 3e0a859b658406541901a8ff72d558ac, type: 3}
