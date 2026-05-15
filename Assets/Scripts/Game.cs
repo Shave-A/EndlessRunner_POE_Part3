@@ -12,9 +12,12 @@ public class Game : MonoBehaviour
         if (instance == null)
         {
             instance = this;
+            DontDestroyOnLoad(gameObject);
+            Debug.Log("Game instance created");
         }
         else
         {
+            Debug.Log("Duplicate destroyed");
             Destroy(gameObject);
         }
     }

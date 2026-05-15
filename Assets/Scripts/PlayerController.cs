@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -7,6 +8,7 @@ public class PlayerController : MonoBehaviour
     public float baseForwardSpeed = 10f;
     public float laneDistance = 3f;
     public float smoothLaneSpeed = 15f;
+    private float speedIncreaseTimer = 0f;
 
     [Header("Controls")]
     public KeyCode jumpKey = KeyCode.W;
@@ -92,7 +94,15 @@ public class PlayerController : MonoBehaviour
 
         HandleTimers();
 
-        
+        speedIncreaseTimer += Time.deltaTime;
+        if (speedIncreaseTimer >= 2f)
+        {
+            speedIncreaseTimer = 0f;
+            if (!isBoosted)
+                baseForwardSpeed += 0.1f;
+            currentSpeed = isBoosted ? baseForwardSpeed * boostMultiplier : baseForwardSpeed;
+        } 
+
         if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
             currentLane = Mathf.Clamp(currentLane - 1, 0, 2);
 
@@ -143,6 +153,8 @@ public class PlayerController : MonoBehaviour
             if (slideTimer <= 0)
                 EndSlide();
         }
+
+
     }
 
     void FixedUpdate()
@@ -286,18 +298,12 @@ public class PlayerController : MonoBehaviour
     private void Die()
     {
         isDead = true;
-
-        Time.timeScale = 0f;
-
-        if (gameOverCanvas != null)
-            gameOverCanvas.enabled = true;
-
-        
+        Time.timeScale = 1f;
         rb.constraints = RigidbodyConstraints.None;
-
         rb.AddTorque(
             new Vector3(5, 0, 10),
             ForceMode.Impulse
         );
+        SceneManager.LoadScene("Death_Screen");
     }
 }

@@ -5,6 +5,9 @@ public class ObstacleType
 {
     public GameObject prefab;
     public float spawnHeight = 1f;
+
+    [Header("Rotation")]
+    public Vector3 spawnRotation; // Rotation in Inspector (X,Y,Z)
 }
 
 public class ObstacleSpawner : MonoBehaviour
@@ -22,11 +25,12 @@ public class ObstacleSpawner : MonoBehaviour
 
     [Header("Group Spawning")]
     public bool useGroups = true;
+
     [Range(1, 3)]
     public int maxObstaclesPerGroup = 2;
 
     private float nextSpawnTime = 0f;
-    private bool isPaused = false;           // ← New
+    private bool isPaused = false;
 
     void Start()
     {
@@ -41,7 +45,8 @@ public class ObstacleSpawner : MonoBehaviour
 
     void Update()
     {
-        if (player == null || obstacleTypes.Length == 0 || isPaused) return;
+        if (player == null || obstacleTypes.Length == 0 || isPaused)
+            return;
 
         if (Time.time >= nextSpawnTime)
         {
@@ -52,16 +57,30 @@ public class ObstacleSpawner : MonoBehaviour
 
     void SpawnGroup()
     {
-        int obstaclesInGroup = useGroups ? Random.Range(1, maxObstaclesPerGroup + 1) : 1;
+        int obstaclesInGroup = useGroups
+            ? Random.Range(1, maxObstaclesPerGroup + 1)
+            : 1;
+
         int startLane = Random.Range(0, 3);
         float currentX = (startLane - 1) * 3f;
 
         for (int i = 0; i < obstaclesInGroup; i++)
         {
             ObstacleType chosen = obstacleTypes[Random.Range(0, obstacleTypes.Length)];
-            Vector3 spawnPos = new Vector3(currentX, chosen.spawnHeight, player.position.z + spawnDistance);
 
-            Instantiate(chosen.prefab, spawnPos, Quaternion.identity);
+            Vector3 spawnPos = new Vector3(
+                currentX,
+                chosen.spawnHeight,
+                player.position.z + spawnDistance
+            );
+
+            Quaternion rotation = Quaternion.Euler(chosen.spawnRotation);
+
+            Instantiate(
+                chosen.prefab,
+                spawnPos,
+                rotation
+            );
 
             if (i < obstaclesInGroup - 1)
             {
@@ -80,7 +99,8 @@ public class ObstacleSpawner : MonoBehaviour
     public void ResumeSpawning()
     {
         isPaused = false;
-        nextSpawnTime = Time.time + 1f; // Small delay before resuming
+        nextSpawnTime = Time.time + 1f;
+
         Debug.Log("▶️ Normal Obstacles Resumed");
     }
 }
