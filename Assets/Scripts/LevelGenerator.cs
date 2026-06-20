@@ -44,11 +44,26 @@ public class LevelGenerator : MonoBehaviour
 
     void SpawnTile()
     {
+        int score = Game.instance.score;
+
+        
+        bool useForest = (score / 100) % 2 == 1;
+
+        GameObject prefabToUse = useForest ? tilePrefabs[1] : tilePrefabs[0];
+
         GameObject tile = tiles[nextTileIndex];
+        if (tile.name.Replace("(Clone)", "").Trim() != prefabToUse.name)
+        {
+            Destroy(tile);
+            tile = Instantiate(prefabToUse);
+            tiles[nextTileIndex] = tile;
+        }
+
         tile.SetActive(true);
         tile.transform.position = new Vector3(0, 0, spawnZ);
         spawnZ += tileLength;
         nextTileIndex = (nextTileIndex + 1) % poolSize;
+
     }
 
     void DespawnOldTiles()

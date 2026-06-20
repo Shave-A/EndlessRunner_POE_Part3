@@ -55,13 +55,13 @@ public class BossEventManager : MonoBehaviour
 
         if (obstacleSpawner != null)
             obstacleSpawner.PauseSpawning();
-
-        // Spawn Boss
+        //spawn boss
         PlayerController player = FindAnyObjectByType<PlayerController>();
         if (player != null)
         {
             Vector3 spawnPos = player.transform.position + new Vector3(0, 10f, 35f);
             GameObject bossObj = Instantiate(bossPrefab, spawnPos, Quaternion.identity);
+            bossObj.transform.SetParent(null); // ← ADDED
             activeBoss = bossObj.GetComponent<BossHover>();
             if (activeBoss != null)
                 activeBoss.player = player.transform;
@@ -136,5 +136,17 @@ public class BossEventManager : MonoBehaviour
 
         Debug.Log("✅ Boss Event Ended");
         triggerScore += 500f;   // Next boss trigger
+    }
+
+    void OnDisable()
+    {
+        isBossActive = false;
+        CancelInvoke("SpawnBossObstacle");
+
+        if (activeBoss != null)
+        {
+            Destroy(activeBoss.gameObject);
+            activeBoss = null;
+        }
     }
 }
