@@ -28,4 +28,10 @@ public class Game : MonoBehaviour
         scoreText.text = "Score: " + score;
     
     }
+
+    public void ResetGame()
+    {
+        score = 0;
+        ScoreUI();
+    }
 }
