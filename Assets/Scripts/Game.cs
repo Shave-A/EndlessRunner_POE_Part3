@@ -6,6 +6,7 @@ public class Game : MonoBehaviour
     public static Game instance;
     public int score;
     public TextMeshProUGUI scoreText;
+    public int bossesDefeated = 0;
 
     private void Awake()
     {

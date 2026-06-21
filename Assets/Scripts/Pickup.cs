@@ -3,7 +3,7 @@ using UnityEngine;
 public enum PickupType
 {
     SpeedBoost,
-    Shield,
+    ScoreMultiplier,
     SuperJump
 }
 

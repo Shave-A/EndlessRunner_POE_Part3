@@ -136,6 +136,7 @@ public class BossEventManager : MonoBehaviour
 
         Debug.Log("✅ Boss Event Ended");
         triggerScore += 500f;   // Next boss trigger
+        Game.instance.bossesDefeated++;
     }
 
     void OnDisable()

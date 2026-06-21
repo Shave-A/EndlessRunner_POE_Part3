@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -27,11 +28,21 @@ public class PlayerController : MonoBehaviour
     public float boostMultiplier = 1.8f;
     public float boostDuration = 4f;
 
-    [Header("Shield")]
-    public float shieldDuration = 5f;
+    [Header("mutiplier")]
+    public float scoreMultiplierValue = 2f;
+    public float scoreMultiplierDuration = 8f;
 
     [Header("Super Jump")]
     public float superJumpMultiplier = 1.8f;
+    public float superJumpDuration = 5f;
+
+    [Header("Score Multiplier")]
+    public float scoreMultiplier = 1f;
+
+    [Header("Pickup UI")]
+    public GameObject speedBoostIndicator;   // assign in Inspector
+    public GameObject shieldIndicator;       // assign in Inspector
+    public GameObject superJumpIndicator;    // assign in Inspector
 
     private Rigidbody rb;
     private int currentLane = 1;
@@ -43,12 +54,13 @@ public class PlayerController : MonoBehaviour
     private bool isBoosted = false;
     private float boostTimer = 0f;
 
-    // Shield
-    private bool hasShield = false;
-    private float shieldTimer = 0f;
+    // Score Mult
+    private bool isMultiplierActive = false;
+    private float multiplierTimer = 0f;
 
     // Super Jump
-    private bool isSuperJumpReady = false;
+    private bool isSuperJumpActive = false;
+    private float superJumpTimer = 0f;
 
     // Sliding
     private bool isSliding = false;
@@ -72,13 +84,13 @@ public class PlayerController : MonoBehaviour
             originalCenter = boxCollider.center;
         }
 
-        
+     
         rb.constraints = RigidbodyConstraints.FreezeRotationX |
                          RigidbodyConstraints.FreezeRotationY |
                          RigidbodyConstraints.FreezeRotationZ;
 
         GameObject canvasObj = GameObject.Find("GameOverCanvas");
-
+      
         if (canvasObj != null)
         {
             gameOverCanvas = canvasObj.GetComponent<Canvas>();
@@ -86,6 +98,11 @@ public class PlayerController : MonoBehaviour
         }
 
         currentSpeed = baseForwardSpeed;
+
+        // Hide all indicators at start
+        SetIndicator(speedBoostIndicator, false);
+        SetIndicator(shieldIndicator, false);
+        SetIndicator(superJumpIndicator, false);
     }
 
     void Update()
@@ -101,7 +118,7 @@ public class PlayerController : MonoBehaviour
             if (!isBoosted)
                 baseForwardSpeed += 0.1f;
             currentSpeed = isBoosted ? baseForwardSpeed * boostMultiplier : baseForwardSpeed;
-        } 
+        }
 
         if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
             currentLane = Mathf.Clamp(currentLane - 1, 0, 2);
@@ -109,18 +126,21 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
             currentLane = Mathf.Clamp(currentLane + 1, 0, 2);
 
-        
+
         if ((Input.GetKeyDown(jumpKey) || Input.GetKeyDown(KeyCode.Space))
             && isGrounded
             && !isSliding)
         {
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z); 
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            // Use super jump multiplier if active
+            float actualJumpForce = isSuperJumpActive ? jumpForce * superJumpMultiplier : jumpForce;
+
+            rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+            rb.AddForce(Vector3.up * actualJumpForce, ForceMode.Impulse);
             isGrounded = false;
-            isSuperJumpReady = false;
+
         }
 
-        
+
         if (rb.linearVelocity.y < 0)
         {
             rb.linearVelocity +=
@@ -129,8 +149,7 @@ public class PlayerController : MonoBehaviour
                 Time.deltaTime;
         }
         else if (rb.linearVelocity.y > 0 &&
-                !(Input.GetKey(jumpKey) ||
-                Input.GetKey(KeyCode.Space)))
+                !(Input.GetKey(jumpKey) || Input.GetKey(KeyCode.Space)))
         {
             rb.linearVelocity +=
                 Vector3.up * Physics.gravity.y *
@@ -138,13 +157,9 @@ public class PlayerController : MonoBehaviour
                 Time.deltaTime;
         }
 
-        
-        if (Input.GetKeyDown(slideKey)
-            && isGrounded
-            && !isSliding)
-        {
+        if (Input.GetKeyDown(slideKey) && isGrounded && !isSliding)
             StartSlide();
-        }
+
 
         if (isSliding)
         {
@@ -161,12 +176,12 @@ public class PlayerController : MonoBehaviour
     {
         if (isDead) return;
 
-      
+
         float targetX = (currentLane - 1) * laneDistance;
 
         float xVel = (targetX - transform.position.x) * smoothLaneSpeed;
         float zVel = currentSpeed;
-        float yVel = rb.linearVelocity.y; 
+        float yVel = rb.linearVelocity.y;
 
         rb.linearVelocity = new Vector3(xVel, yVel, zVel);
     }
@@ -181,12 +196,26 @@ public class PlayerController : MonoBehaviour
                 EndBoost();
         }
 
-        if (hasShield)
-        {
-            shieldTimer -= Time.deltaTime;
+        if(isMultiplierActive)
+{
+            multiplierTimer -= Time.deltaTime;
+            if (multiplierTimer <= 0)
+            {
+                isMultiplierActive = false;
+                scoreMultiplier = 1f;
+                SetIndicator(shieldIndicator, false);
+            }
+        }
 
-            if (shieldTimer <= 0)
-                hasShield = false;
+        if (isSuperJumpActive)
+        {
+            superJumpTimer -= Time.deltaTime;
+            if (superJumpTimer <= 0)
+            {
+                isSuperJumpActive = false;
+                scoreMultiplier = 1f;
+                SetIndicator(superJumpIndicator, false);
+            }
         }
     }
 
@@ -198,8 +227,8 @@ public class PlayerController : MonoBehaviour
                 ActivateSpeedBoost();
                 break;
 
-            case PickupType.Shield:
-                ActivateShield();
+            case PickupType.ScoreMultiplier:
+                ActivateScoreMultiplier();
                 break;
 
             case PickupType.SuperJump:
@@ -213,23 +242,36 @@ public class PlayerController : MonoBehaviour
         isBoosted = true;
         boostTimer = boostDuration;
         currentSpeed = baseForwardSpeed * boostMultiplier;
+        SetIndicator(speedBoostIndicator, true);
     }
 
     private void EndBoost()
     {
         isBoosted = false;
         currentSpeed = baseForwardSpeed;
+        SetIndicator(speedBoostIndicator, false);
     }
 
-    private void ActivateShield()
+    private void ActivateScoreMultiplier()
     {
-        hasShield = true;
-        shieldTimer = shieldDuration;
+        isMultiplierActive = true;
+        multiplierTimer = scoreMultiplierDuration;
+        scoreMultiplier = scoreMultiplierValue;
+        SetIndicator(shieldIndicator, true);
     }
 
     private void ActivateSuperJump()
     {
-        isSuperJumpReady = true;
+        isSuperJumpActive = true;
+        superJumpTimer = superJumpDuration;
+        scoreMultiplier = 2f;  // Double score while active
+        SetIndicator(superJumpIndicator, true);
+    }
+
+    private void SetIndicator(GameObject indicator, bool active)
+    {
+        if (indicator != null)
+            indicator.SetActive(active);
     }
 
     private void StartSlide()
@@ -243,13 +285,7 @@ public class PlayerController : MonoBehaviour
         newSize.y = slideHeight;
 
         boxCollider.size = newSize;
-
-        boxCollider.center =
-            new Vector3(
-                originalCenter.x,
-                slideHeight / 2f,
-                originalCenter.z
-            );
+        boxCollider.center = new Vector3(originalCenter.x, slideHeight / 2f, originalCenter.z);
     }
 
     private void EndSlide()
@@ -278,14 +314,8 @@ public class PlayerController : MonoBehaviour
     {
         if (other.CompareTag("Obstacle"))
         {
-            if (hasShield)
-            {
-                hasShield = false;
-                return;
-            }
-
-            if (!isDead)
-                Die();
+            
+            if (!isDead) Die();
         }
 
         else if (other.TryGetComponent<Pickup>(out Pickup pickup))
@@ -300,10 +330,7 @@ public class PlayerController : MonoBehaviour
         isDead = true;
         Time.timeScale = 1f;
         rb.constraints = RigidbodyConstraints.None;
-        rb.AddTorque(
-            new Vector3(5, 0, 10),
-            ForceMode.Impulse
-        );
+        rb.AddTorque(new Vector3(5, 0, 10), ForceMode.Impulse);
         SceneManager.LoadScene("Death_Screen");
     }
 }
