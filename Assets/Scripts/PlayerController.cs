@@ -84,13 +84,13 @@ public class PlayerController : MonoBehaviour
             originalCenter = boxCollider.center;
         }
 
-     
+
         rb.constraints = RigidbodyConstraints.FreezeRotationX |
                          RigidbodyConstraints.FreezeRotationY |
                          RigidbodyConstraints.FreezeRotationZ;
 
         GameObject canvasObj = GameObject.Find("GameOverCanvas");
-      
+
         if (canvasObj != null)
         {
             gameOverCanvas = canvasObj.GetComponent<Canvas>();
@@ -194,8 +194,8 @@ public class PlayerController : MonoBehaviour
                 EndBoost();
         }
 
-        if(isMultiplierActive)
-{
+        if (isMultiplierActive)
+        {
             multiplierTimer -= Time.deltaTime;
             if (multiplierTimer <= 0)
             {

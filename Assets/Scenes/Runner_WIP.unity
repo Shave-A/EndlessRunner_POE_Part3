@@ -1693,7 +1693,7 @@ Transform:
   m_GameObject: {fileID: 919132149012954262}
   serializedVersion: 2
   m_LocalRotation: {x: -0.5, y: 0.5, z: 0.5, w: 0.5}
-  m_LocalPosition: {x: 0.55, y: 1.27, z: -8.029608}
+  m_LocalPosition: {x: 0.55, y: 2.35, z: -8.029608}
   m_LocalScale: {x: 100, y: 100, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1797,7 +1797,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.06, y: 0.02, z: 0.01}
+  m_Size: {x: 0.05, y: 0.02, z: 0.01}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &931771383395332073
 PrefabInstance:
@@ -1813,15 +1813,31 @@ PrefabInstance:
       objectReference: {fileID: 543450652668241452}
     - target: {fileID: 3314360116587662013, guid: b46fd15a10cf53d4d987e5ce562e9754, type: 3}
       propertyPath: poolSize
-      value: 60
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 3314360116587662013, guid: b46fd15a10cf53d4d987e5ce562e9754, type: 3}
       propertyPath: tileLength
       value: 53
       objectReference: {fileID: 0}
     - target: {fileID: 3314360116587662013, guid: b46fd15a10cf53d4d987e5ce562e9754, type: 3}
+      propertyPath: cityTile.prefab
+      value: 
+      objectReference: {fileID: 2516657295919025118}
+    - target: {fileID: 3314360116587662013, guid: b46fd15a10cf53d4d987e5ce562e9754, type: 3}
+      propertyPath: forestTile.prefab
+      value: 
+      objectReference: {fileID: 1995825714}
+    - target: {fileID: 3314360116587662013, guid: b46fd15a10cf53d4d987e5ce562e9754, type: 3}
       propertyPath: tilePrefabs.Array.size
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3314360116587662013, guid: b46fd15a10cf53d4d987e5ce562e9754, type: 3}
+      propertyPath: cityTile.spawnRotation.x
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 3314360116587662013, guid: b46fd15a10cf53d4d987e5ce562e9754, type: 3}
+      propertyPath: cityTile.spawnRotation.y
+      value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 3314360116587662013, guid: b46fd15a10cf53d4d987e5ce562e9754, type: 3}
       propertyPath: 'tilePrefabs.Array.data[0]'
@@ -2142,7 +2158,7 @@ PrefabInstance:
       objectReference: {fileID: 543450652668241452}
     - target: {fileID: 7144445188292722334, guid: bc9af64e1d8d44346934875d10288558, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 19.3
+      value: 19.1
       objectReference: {fileID: 0}
     - target: {fileID: 7144445188292722334, guid: bc9af64e1d8d44346934875d10288558, type: 3}
       propertyPath: m_LocalPosition.y
@@ -2150,7 +2166,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7144445188292722334, guid: bc9af64e1d8d44346934875d10288558, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 54.48
+      value: 54.4
       objectReference: {fileID: 0}
     - target: {fileID: 7144445188292722334, guid: bc9af64e1d8d44346934875d10288558, type: 3}
       propertyPath: m_LocalRotation.w

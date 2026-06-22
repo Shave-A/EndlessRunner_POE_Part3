@@ -1,11 +1,20 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
+
+[System.Serializable]
+public class TileType
+{
+    public GameObject prefab;
+    public Vector3 spawnRotation = Vector3.zero;   // ← Add rotation here
+}
 
 public class LevelGenerator : MonoBehaviour
 {
     [Header("Road Settings")]
-    public GameObject[] tilePrefabs;
-    public int poolSize = 20;
+    public TileType cityTile;
+    public TileType forestTile;
+
+    public int poolSize = 15;
     public float tileLength = 20f;
     public Transform player;
 
@@ -16,37 +25,43 @@ public class LevelGenerator : MonoBehaviour
 
     void Start()
     {
-        if (tilePrefabs.Length < 2 || player == null) return;
+        if (cityTile.prefab == null || forestTile.prefab == null || player == null)
+        {
+            Debug.LogError("LevelGenerator: Missing tile prefabs or Player!");
+            return;
+        }
 
-        // Pre-create separate pools for each biome
+        // Create City Tile Pool
         for (int i = 0; i < poolSize; i++)
         {
-            GameObject city = Instantiate(tilePrefabs[0]);
+            GameObject city = Instantiate(cityTile.prefab);
             city.SetActive(false);
             cityTiles.Add(city);
+        }
 
-            GameObject forest = Instantiate(tilePrefabs[1]);
+        // Create Forest Tile Pool
+        for (int i = 0; i < poolSize; i++)
+        {
+            GameObject forest = Instantiate(forestTile.prefab);
             forest.SetActive(false);
             forestTiles.Add(forest);
         }
 
-        spawnZ = -tileLength;
-        for (int i = 0; i < 8; i++)
+        spawnZ = -tileLength * 3f;
+        for (int i = 0; i < 12; i++)
             SpawnTile();
     }
 
     void Update()
     {
-        foreach (GameObject tile in cityTiles)
+        if (player == null) return;
+
+        if (player.position.z > spawnZ - (tileLength * 3f))
         {
-            if (tile != null && tile.activeInHierarchy && tile.transform.position.z + tileLength * 2 < player.position.z)
-                tile.SetActive(false);
+            SpawnTile();
         }
-        foreach (GameObject tile in forestTiles)
-        {
-            if (tile != null && tile.activeInHierarchy && tile.transform.position.z + tileLength * 2 < player.position.z)
-                tile.SetActive(false);
-        }
+
+        DespawnOldTiles();
     }
 
     void SpawnTile()
@@ -54,28 +69,31 @@ public class LevelGenerator : MonoBehaviour
         int score = Game.instance != null ? Game.instance.score : 0;
         bool useForest = (score / 25) % 2 == 1;
 
-        // Pick from the correct pool � no destroying ever
         List<GameObject> pool = useForest ? forestTiles : cityTiles;
+        TileType currentTileType = useForest ? forestTile : cityTile;
 
         GameObject tile = pool[nextTileIndex];
         tile.SetActive(true);
         tile.transform.position = new Vector3(0, 0, spawnZ);
+        tile.transform.rotation = Quaternion.Euler(currentTileType.spawnRotation);
+
         spawnZ += tileLength;
-        Debug.Log("nextTileIndex: " + nextTileIndex + " | pool.Count: " + pool.Count);
         nextTileIndex = (nextTileIndex + 1) % pool.Count;
     }
 
     void DespawnOldTiles()
     {
+        float despawnZ = player.position.z - tileLength * 3f;
+
         foreach (GameObject tile in cityTiles)
         {
-            if (tile.activeInHierarchy && tile.transform.position.z + tileLength * 2 < player.position.z)
+            if (tile.activeInHierarchy && tile.transform.position.z < despawnZ)
                 tile.SetActive(false);
         }
 
         foreach (GameObject tile in forestTiles)
         {
-            if (tile.activeInHierarchy && tile.transform.position.z + tileLength * 2 < player.position.z)
+            if (tile.activeInHierarchy && tile.transform.position.z < despawnZ)
                 tile.SetActive(false);
         }
     }
