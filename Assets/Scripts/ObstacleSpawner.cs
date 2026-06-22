@@ -5,8 +5,6 @@ public class ObstacleType
 {
     public GameObject prefab;
     public float spawnHeight = 1f;
-
-    [Header("Rotation")]
     public Vector3 spawnRotation;
 }
 
@@ -28,7 +26,6 @@ public class ObstacleSpawner : MonoBehaviour
 
     [Header("Group Spawning")]
     public bool useGroups = true;
-
     [Range(1, 3)]
     public int maxObstaclesPerGroup = 2;
 
@@ -58,39 +55,38 @@ public class ObstacleSpawner : MonoBehaviour
         }
     }
 
-        void SpawnGroup()
+    void SpawnGroup()
+    {
+        bool inForest = (Game.instance.score / 25) % 2 == 1;
+        ObstacleType[] currentObstacles = inForest ? forestObstacleTypes : cityObstacleTypes;
+
+        if (currentObstacles.Length == 0)
         {
-            bool inForest = (Game.instance.score / 25) % 2 == 1;
-            ObstacleType[] currentObstacles = inForest ? forestObstacleTypes : cityObstacleTypes;
-
-            if (currentObstacles.Length == 0) return;
-
-            int obstaclesInGroup = useGroups ? Random.Range(1, maxObstaclesPerGroup + 1) : 1;
-
-            for (int i = 0; i < obstaclesInGroup; i++)
-            {
-                int chosenIndex = Random.Range(0, currentObstacles.Length);
-                ObstacleType chosen = currentObstacles[chosenIndex];
-
-                float xPos;
-
-                // Index 1 in both biomes always spawns in middle
-                if (chosenIndex == 1)
-                {
-                    xPos = 0f;
-                }
-                else
-                {
-                    int lane = Random.Range(0, 3);
-                    xPos = (lane - 1) * 3f;
-                }
-
-                Vector3 spawnPos = new Vector3(xPos, chosen.spawnHeight, player.position.z + spawnDistance);
-                Quaternion rotation = Quaternion.Euler(chosen.spawnRotation);
-                Instantiate(chosen.prefab, spawnPos, rotation);
-            }
+            Debug.LogError("No obstacles in current biome!");
+            return;
         }
-    
+
+        int obstaclesInGroup = useGroups ? Random.Range(1, maxObstaclesPerGroup + 1) : 1;
+
+        for (int i = 0; i < obstaclesInGroup; i++)
+        {
+            // FORCE random selection + better logging
+            int chosenIndex = Random.Range(0, currentObstacles.Length);
+
+            Debug.Log($"[Spawn Debug] Biome: {(inForest ? "🌲 Forest" : "🏙️ City")} | Total Obstacles: {currentObstacles.Length} | Chosen Index: {chosenIndex}");
+
+            ObstacleType chosen = currentObstacles[chosenIndex];
+
+            float xPos = (chosenIndex == 1) ? 0f : (Random.Range(0, 3) - 1) * 3f;
+
+            Vector3 spawnPos = new Vector3(xPos, chosen.spawnHeight, player.position.z + spawnDistance);
+            Quaternion rotation = Quaternion.Euler(chosen.spawnRotation);
+
+            Instantiate(chosen.prefab, spawnPos, rotation);
+
+            Debug.Log($"✅ Spawned: {chosen.prefab.name} (Index {chosenIndex})");
+        }
+    }
 
     public void PauseSpawning()
     {
