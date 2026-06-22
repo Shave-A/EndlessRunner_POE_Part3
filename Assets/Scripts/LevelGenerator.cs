@@ -67,7 +67,7 @@ public class LevelGenerator : MonoBehaviour
     void SpawnTile()
     {
         int score = Game.instance != null ? Game.instance.score : 0;
-        bool useForest = (score / 25) % 2 == 1;
+        bool useForest = (score / 5) % 2 == 1;
 
         List<GameObject> pool = useForest ? forestTiles : cityTiles;
         TileType currentTileType = useForest ? forestTile : cityTile;
