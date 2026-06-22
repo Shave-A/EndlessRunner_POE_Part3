@@ -37,23 +37,17 @@ public class GetScores : MonoBehaviour
 
             if (www.result == UnityWebRequest.Result.Success)
             {
-                Debug.Log("Response: " + www.downloadHandler.text);
-
                 string json = "{\"scores\":" + www.downloadHandler.text + "}";
-                Debug.Log("Parsed JSON: " + json);
                 ScoreList scoreList = JsonUtility.FromJson<ScoreList>(json);
-                Debug.Log("Score count: " + scoreList.scores.Count);
 
                 int rank = 1;
                 foreach (ScoreEntry entry in scoreList.scores)
                 {
                     GameObject row = Instantiate(entryPrefab, contentParent);
-                    TMP_Text[] texts = row.GetComponentsInChildren<TMP_Text>();
-                    texts[0].text = rank.ToString();
-                    texts[1].text = entry.name;
-                    texts[2].text = entry.score.ToString();
-
-                    Debug.Log("Set texts: " + texts[0].text + " " + texts[1].text + " " + texts[2].text);
+                    TMP_Text text = row.GetComponent<TMP_Text>();
+                    text.text = rank + ".  " + entry.name + "  -  " + entry.score;
+                    text.color = Color.black;
+                    text.fontSize = 24;
                     rank++;
                 }
             }
@@ -61,7 +55,6 @@ public class GetScores : MonoBehaviour
             {
                 Debug.LogError("Failed: " + www.error);
             }
-
         }
     }
 }
