@@ -7,13 +7,16 @@ public class ObstacleType
     public float spawnHeight = 1f;
 
     [Header("Rotation")]
-    public Vector3 spawnRotation; // Rotation in Inspector (X,Y,Z)
+    public Vector3 spawnRotation;
 }
 
 public class ObstacleSpawner : MonoBehaviour
 {
-    [Header("Obstacle Types")]
-    public ObstacleType[] obstacleTypes;
+    [Header("City Obstacles")]
+    public ObstacleType[] cityObstacleTypes;
+
+    [Header("Forest Obstacles")]
+    public ObstacleType[] forestObstacleTypes;
 
     [Header("References")]
     public Transform player;
@@ -34,9 +37,10 @@ public class ObstacleSpawner : MonoBehaviour
 
     void Start()
     {
-        if (obstacleTypes.Length == 0)
-            Debug.LogError("❌ No obstacle types assigned!");
-
+        if (cityObstacleTypes.Length == 0)
+            Debug.LogError("❌ No city obstacle types assigned!");
+        if (forestObstacleTypes.Length == 0)
+            Debug.LogError("❌ No forest obstacle types assigned!");
         if (player == null)
             Debug.LogError("❌ Player reference missing!");
 
@@ -45,8 +49,7 @@ public class ObstacleSpawner : MonoBehaviour
 
     void Update()
     {
-        if (player == null || obstacleTypes.Length == 0 || isPaused)
-            return;
+        if (player == null || isPaused) return;
 
         if (Time.time >= nextSpawnTime)
         {
@@ -57,6 +60,12 @@ public class ObstacleSpawner : MonoBehaviour
 
     void SpawnGroup()
     {
+        // Pick obstacle set based on current biome
+        bool inForest = (Game.instance.score / 25) % 2 == 1;
+        ObstacleType[] currentObstacles = inForest ? forestObstacleTypes : cityObstacleTypes;
+
+        if (currentObstacles.Length == 0) return;
+
         int obstaclesInGroup = useGroups
             ? Random.Range(1, maxObstaclesPerGroup + 1)
             : 1;
@@ -66,7 +75,7 @@ public class ObstacleSpawner : MonoBehaviour
 
         for (int i = 0; i < obstaclesInGroup; i++)
         {
-            ObstacleType chosen = obstacleTypes[Random.Range(0, obstacleTypes.Length)];
+            ObstacleType chosen = currentObstacles[Random.Range(0, currentObstacles.Length)];
 
             Vector3 spawnPos = new Vector3(
                 currentX,
@@ -75,21 +84,13 @@ public class ObstacleSpawner : MonoBehaviour
             );
 
             Quaternion rotation = Quaternion.Euler(chosen.spawnRotation);
-
-            Instantiate(
-                chosen.prefab,
-                spawnPos,
-                rotation
-            );
+            Instantiate(chosen.prefab, spawnPos, rotation);
 
             if (i < obstaclesInGroup - 1)
-            {
                 currentX += Random.Range(1.5f, 3f);
-            }
         }
     }
 
-    // ====================== BOSS CONTROL ======================
     public void PauseSpawning()
     {
         isPaused = true;
@@ -100,7 +101,6 @@ public class ObstacleSpawner : MonoBehaviour
     {
         isPaused = false;
         nextSpawnTime = Time.time + 1f;
-
         Debug.Log("▶️ Normal Obstacles Resumed");
     }
 }

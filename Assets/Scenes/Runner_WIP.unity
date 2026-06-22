@@ -595,13 +595,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 740a376d3b71784488e3d45d41f6e8fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  obstacleTypes:
-  - prefab: {fileID: 5166539553368149111, guid: fa7da63d8b48a2847b48426011d3fceb, type: 3}
-    spawnHeight: 1.5
-    spawnRotation: {x: -90, y: 0, z: 90}
-  - prefab: {fileID: 1811771624}
-    spawnHeight: 1
-    spawnRotation: {x: 3, y: 90, z: 0}
+  cityObstacleTypes:
+  - prefab: {fileID: 0}
+    spawnHeight: 0
+    spawnRotation: {x: 0, y: 0, z: 0}
+  - prefab: {fileID: 0}
+    spawnHeight: 0
+    spawnRotation: {x: 0, y: 0, z: 0}
+  forestObstacleTypes:
+  - prefab: {fileID: 0}
+    spawnHeight: 0
+    spawnRotation: {x: 0, y: 0, z: 0}
+  - prefab: {fileID: 0}
+    spawnHeight: 0
+    spawnRotation: {x: 0, y: 0, z: 0}
   player: {fileID: 543450652668241452}
   spawnDistance: 50
   minSpawnInterval: 2
@@ -973,9 +980,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecd8c4f7af0f35344b0332d29a3dad5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEventManager
-  triggerScore: 5
+  bossScoreInterval: 12
   bossEventDuration: 15
-  bossPrefab: {fileID: 3126398431767348903, guid: 69cbabd2510cc364f9409a4f1651a7bd, type: 3}
+  helicopterBossPrefab: {fileID: 3126398431767348903, guid: 69cbabd2510cc364f9409a4f1651a7bd, type: 3}
+  carBossPrefab: {fileID: 0}
   bossObstacleSpawnInterval: 1
   bossObstacleSpawnDelay: 3
   wideWallLeftPrefab: {fileID: 1009299091}
@@ -1167,11 +1175,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f10a14bb0194d6e4fa554f5d33d65e5b, type: 3}
---- !u!1 &1811771624 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: f10a14bb0194d6e4fa554f5d33d65e5b, type: 3}
-  m_PrefabInstance: {fileID: 1811771623}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1847947232
 GameObject:
   m_ObjectHideFlags: 0
