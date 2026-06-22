@@ -5,24 +5,29 @@ public class LevelGenerator : MonoBehaviour
 {
     [Header("Road Settings")]
     public GameObject[] tilePrefabs;
-    public int poolSize = 12;
+    public int poolSize = 20;
     public float tileLength = 20f;
     public Transform player;
 
-    private List<GameObject> tiles = new List<GameObject>();
+    private List<GameObject> cityTiles = new List<GameObject>();
+    private List<GameObject> forestTiles = new List<GameObject>();
     private float spawnZ = 0f;
     private int nextTileIndex = 0;
 
     void Start()
     {
-        if (tilePrefabs.Length == 0 || player == null) return;
+        if (tilePrefabs.Length < 2 || player == null) return;
 
-        // Create pool
+        // Pre-create separate pools for each biome
         for (int i = 0; i < poolSize; i++)
         {
-            GameObject tile = Instantiate(tilePrefabs[0]);
-            tile.SetActive(false);
-            tiles.Add(tile);
+            GameObject city = Instantiate(tilePrefabs[0]);
+            city.SetActive(false);
+            cityTiles.Add(city);
+
+            GameObject forest = Instantiate(tilePrefabs[1]);
+            forest.SetActive(false);
+            forestTiles.Add(forest);
         }
 
         spawnZ = -tileLength;
@@ -32,48 +37,46 @@ public class LevelGenerator : MonoBehaviour
 
     void Update()
     {
-        if (player == null) return;
-
-        // Spawn new tiles
-        if (player.position.z > spawnZ - (tileLength * 3f))
-            SpawnTile();
-
-        // Despawn old tiles
-        DespawnOldTiles();
+        foreach (GameObject tile in cityTiles)
+        {
+            if (tile != null && tile.activeInHierarchy && tile.transform.position.z + tileLength * 2 < player.position.z)
+                tile.SetActive(false);
+        }
+        foreach (GameObject tile in forestTiles)
+        {
+            if (tile != null && tile.activeInHierarchy && tile.transform.position.z + tileLength * 2 < player.position.z)
+                tile.SetActive(false);
+        }
     }
 
     void SpawnTile()
     {
-        int score = Game.instance.score;
+        int score = Game.instance != null ? Game.instance.score : 0;
+        bool useForest = (score / 25) % 2 == 1;
 
-        
-        bool useForest = (score / 100) % 2 == 1;
+        // Pick from the correct pool — no destroying ever
+        List<GameObject> pool = useForest ? forestTiles : cityTiles;
 
-        GameObject prefabToUse = useForest ? tilePrefabs[1] : tilePrefabs[0];
-
-        GameObject tile = tiles[nextTileIndex];
-        if (tile.name.Replace("(Clone)", "").Trim() != prefabToUse.name)
-        {
-            Destroy(tile);
-            tile = Instantiate(prefabToUse);
-            tiles[nextTileIndex] = tile;
-        }
-
+        GameObject tile = pool[nextTileIndex];
         tile.SetActive(true);
         tile.transform.position = new Vector3(0, 0, spawnZ);
         spawnZ += tileLength;
-        nextTileIndex = (nextTileIndex + 1) % poolSize;
-
+        Debug.Log("nextTileIndex: " + nextTileIndex + " | pool.Count: " + pool.Count);
+        nextTileIndex = (nextTileIndex + 1) % pool.Count;
     }
 
     void DespawnOldTiles()
     {
-        foreach (GameObject tile in tiles)
+        foreach (GameObject tile in cityTiles)
         {
             if (tile.activeInHierarchy && tile.transform.position.z + tileLength * 2 < player.position.z)
-            {
                 tile.SetActive(false);
-            }
+        }
+
+        foreach (GameObject tile in forestTiles)
+        {
+            if (tile.activeInHierarchy && tile.transform.position.z + tileLength * 2 < player.position.z)
+                tile.SetActive(false);
         }
     }
 }

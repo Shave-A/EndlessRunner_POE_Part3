@@ -176,14 +176,12 @@ public class PlayerController : MonoBehaviour
     {
         if (isDead) return;
 
-
         float targetX = (currentLane - 1) * laneDistance;
-
         float xVel = (targetX - transform.position.x) * smoothLaneSpeed;
         float zVel = currentSpeed;
-        float yVel = rb.linearVelocity.y;
 
-        rb.linearVelocity = new Vector3(xVel, yVel, zVel);
+        // Only control X and Z, leave Y alone so jump force isn't overridden
+        rb.linearVelocity = new Vector3(xVel, rb.linearVelocity.y, zVel);
     }
 
     private void HandleTimers()
@@ -291,15 +289,14 @@ public class PlayerController : MonoBehaviour
     private void EndSlide()
     {
         if (boxCollider == null) return;
-
         isSliding = false;
-
         boxCollider.size = originalSize;
         boxCollider.center = originalCenter;
     }
 
     void OnCollisionEnter(Collision collision)
     {
+        Debug.Log("Hit: " + collision.gameObject.name + " Tag: " + collision.gameObject.tag);
         if (collision.gameObject.CompareTag("Ground"))
             isGrounded = true;
     }
@@ -314,10 +311,8 @@ public class PlayerController : MonoBehaviour
     {
         if (other.CompareTag("Obstacle"))
         {
-            
             if (!isDead) Die();
         }
-
         else if (other.TryGetComponent<Pickup>(out Pickup pickup))
         {
             CollectPickup(pickup);

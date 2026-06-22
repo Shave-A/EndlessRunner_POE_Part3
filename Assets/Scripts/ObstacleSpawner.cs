@@ -58,38 +58,39 @@ public class ObstacleSpawner : MonoBehaviour
         }
     }
 
-    void SpawnGroup()
-    {
-        // Pick obstacle set based on current biome
-        bool inForest = (Game.instance.score / 25) % 2 == 1;
-        ObstacleType[] currentObstacles = inForest ? forestObstacleTypes : cityObstacleTypes;
-
-        if (currentObstacles.Length == 0) return;
-
-        int obstaclesInGroup = useGroups
-            ? Random.Range(1, maxObstaclesPerGroup + 1)
-            : 1;
-
-        int startLane = Random.Range(0, 3);
-        float currentX = (startLane - 1) * 3f;
-
-        for (int i = 0; i < obstaclesInGroup; i++)
+        void SpawnGroup()
         {
-            ObstacleType chosen = currentObstacles[Random.Range(0, currentObstacles.Length)];
+            bool inForest = (Game.instance.score / 25) % 2 == 1;
+            ObstacleType[] currentObstacles = inForest ? forestObstacleTypes : cityObstacleTypes;
 
-            Vector3 spawnPos = new Vector3(
-                currentX,
-                chosen.spawnHeight,
-                player.position.z + spawnDistance
-            );
+            if (currentObstacles.Length == 0) return;
 
-            Quaternion rotation = Quaternion.Euler(chosen.spawnRotation);
-            Instantiate(chosen.prefab, spawnPos, rotation);
+            int obstaclesInGroup = useGroups ? Random.Range(1, maxObstaclesPerGroup + 1) : 1;
 
-            if (i < obstaclesInGroup - 1)
-                currentX += Random.Range(1.5f, 3f);
+            for (int i = 0; i < obstaclesInGroup; i++)
+            {
+                int chosenIndex = Random.Range(0, currentObstacles.Length);
+                ObstacleType chosen = currentObstacles[chosenIndex];
+
+                float xPos;
+
+                // Index 1 in both biomes always spawns in middle
+                if (chosenIndex == 1)
+                {
+                    xPos = 0f;
+                }
+                else
+                {
+                    int lane = Random.Range(0, 3);
+                    xPos = (lane - 1) * 3f;
+                }
+
+                Vector3 spawnPos = new Vector3(xPos, chosen.spawnHeight, player.position.z + spawnDistance);
+                Quaternion rotation = Quaternion.Euler(chosen.spawnRotation);
+                Instantiate(chosen.prefab, spawnPos, rotation);
+            }
         }
-    }
+    
 
     public void PauseSpawning()
     {
